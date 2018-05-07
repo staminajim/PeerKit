@@ -40,4 +40,9 @@ class Browser: NSObject, MCNearbyServiceBrowserDelegate {
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         // unused
     }
+
+    public func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
+        NotificationCenter.default.post(name: NSNotification.Name("LocalMultiplayerFailed"), object: nil, userInfo:["error" : error])
+    }
+    
 }

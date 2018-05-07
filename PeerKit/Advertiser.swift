@@ -37,11 +37,12 @@ class Advertiser: NSObject, MCNearbyServiceAdvertiserDelegate {
 //        <#code#>
 //    }
 
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error) {
+        NotificationCenter.default.post(name: NSNotification.Name("LocalMultiplayerFailed"), object: nil, userInfo:["error" : error])
+    }
+
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        let accept = mcSession.myPeerID.hashValue > peerID.hashValue
-        invitationHandler(accept, mcSession)
-        if accept {
-            stopAdvertising()
-        }
+        invitationHandler(true, mcSession)
+        stopAdvertising()        
     }
 }

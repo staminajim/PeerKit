@@ -25,7 +25,7 @@ public class Session: NSObject, MCSessionDelegate {
     public init(displayName: String, delegate: SessionDelegate? = nil) {
         myPeerID = MCPeerID(displayName: displayName)
         self.delegate = delegate
-        mcSession = MCSession(peer: myPeerID)
+        mcSession = MCSession(peer: myPeerID, securityIdentity: nil, encryptionPreference: .none)
         super.init()
         mcSession.delegate = self
     }
@@ -37,6 +37,10 @@ public class Session: NSObject, MCSessionDelegate {
     }
 
     // MARK: MCSessionDelegate
+
+    public func session(_ session: MCSession, didReceiveCertificate certificate: [Any]?, fromPeer peerID: MCPeerID, certificateHandler: @escaping (Bool) -> Void) {
+        certificateHandler(true)
+    }
 
     public func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         switch state {

@@ -12,8 +12,7 @@ import MultipeerConnectivity
 // MARK: Type Aliases
 
 public typealias PeerBlock = ((_ myPeerID: MCPeerID, _ peerID: MCPeerID) -> Void)
-public typealias EventBlock = ((_ peerID: MCPeerID, _ event: String, _ object: AnyObject?) -> Void)
-public typealias ObjectBlock = ((_ peerID: MCPeerID, _ object: AnyObject?) -> Void)
+public typealias DataBlock = ((_ peerID: MCPeerID, _ data: Data) -> Void)
 public typealias ResourceBlock = ((_ myPeerID: MCPeerID, _ resourceName: String, _ peer: MCPeerID, _ localURL: URL?) -> Void)
 
 // MARK: Event Blocks
@@ -21,14 +20,12 @@ public typealias ResourceBlock = ((_ myPeerID: MCPeerID, _ resourceName: String,
 public var onConnecting: PeerBlock?
 public var onConnect: PeerBlock?
 public var onDisconnect: PeerBlock?
-public var onEvent: EventBlock?
-public var onEventObject: ObjectBlock?
+public var onReceivedData: DataBlock?
 public var onFinishReceivingResource: ResourceBlock?
-public var eventBlocks = [String: ObjectBlock]()
 
 // MARK: PeerKit Globals
 
-#if os(iOS)
+#if os(iOS) || os(tvOS)
 import UIKit
 public let myName = UIDevice.current.name
 #else
@@ -68,17 +65,10 @@ func didDisconnect(myPeerID: MCPeerID, peer: MCPeerID) {
 }
 
 func didReceiveData(_ data: Data, fromPeer peer: MCPeerID) {
-    if let dict = NSKeyedUnarchiver.unarchiveObject(with: data) as? [String: AnyObject],
-        let event = dict["event"] as? String,
-        let object = dict["object"] {
-            DispatchQueue.main.async {
-                if let onEvent = onEvent {
-                    onEvent(peer, event, object)
-                }
-                if let eventBlock = eventBlocks[event] {
-                    eventBlock(peer, object)
-                }
-            }
+    DispatchQueue.main.async {
+        if let onReceivedData = onReceivedData {
+            onReceivedData(peer, data)
+        }
     }
 }
 
